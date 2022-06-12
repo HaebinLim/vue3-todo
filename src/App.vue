@@ -12,92 +12,39 @@
 
   <div class="container">
     <h2>To-Do List</h2>
-    <form @submit.prevent="onSubmit">
-      <!-- 
-      @submit.prevent
-      e.preventDefault(); 
-      submit될때 새로고침 방지 -->
-      <div class="d-flex">
-        <div class="flex-grow-1">
-          <input 
-            type="text" 
-            class="form-control" 
-            v-model="todo" 
-            placeholder="Type new to-do" 
-          />
-        </div>
-        <button type="submit" class="btn btn-primary">
-          Add
-        </button>
-      </div>
-      <div v-show="hasError" style="color:red">
-        This field cannot be empty
-      </div>
-    </form>
-    <div v-if="!todos.length">추가된 Todo가 없습니다.</div>
-    <div 
-      v-for="(todo, index) in todos" 
-      :key="todo.id" 
-      class="card mt-2"
-    >
-      <div class="card-body p-2 d-flex align-items-center">
-        <div class="form-check flex-grow-1">
-          <input 
-            :id="`ID${todo.id}`" 
-            type="checkbox" 
-            class="form-check-input" 
-            v-model="todo.completed" 
-          />
-          <label 
-            :for="`ID${todo.id}`" 
-            class="form-check-label" 
-            :class="{ done: todo.completed }"
-            :style="todo.completed ? todoStyle : {}"
-          >
-            {{ todo.subject }}
-          </label>
-        </div>
-        <div>
-          <button 
-            class="btn btn-danger btn-sm"
-            @click="deleteTodo(index)"
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
+    
+    <TodoSimpleForm @add-todo="addTodo" />
 
+    <div v-if="!todos.length">추가된 Todo가 없습니다.</div>
+    
+    <TodoList :todos="todos" />
   </div>
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref } from 'vue';
+import TodoSimpleForm from './components/TodoSimpleForm.vue';
+import TodoList from './components/TodoList.vue';
 
 export default {
+  components: {
+    TodoSimpleForm,
+    TodoList
+  },
   setup(){
-
     const toggle = ref(false);
     const onToggle = () => {
       toggle.value = !toggle.value;
     }
 
-    const todo = ref('');
     const todos = ref([]);
-    const hasError = ref(false);
 
-    const onSubmit = () => {
-      if (todo.value === '') {
-        hasError.value = true;
-      } else {
-        todos.value.push({
-          id: Date.now(), // 거의 유니크
-          subject: todo.value,
-          completed: false,
-        });
-        hasError.value = false;
-        todo.value = '';
-      }
+    const addTodo = (todo) => {
+      todos.value.push(todo);
+    }
+
+    const deleteTodo = (index) => {
+      todos.value.splice(index, 1);
     }
 
     const todoStyle = {
@@ -105,19 +52,13 @@ export default {
       color: 'gray',
     }
 
-    const deleteTodo = (index) => {
-      todos.value.splice(index, 1);
-    }
-
     return {
       toggle,
       onToggle,
-      todo,
       todos,
-      hasError,
-      onSubmit,
-      todoStyle,
+      addTodo,
       deleteTodo,
+      todoStyle,
     }
   }
 }
