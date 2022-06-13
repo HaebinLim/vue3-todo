@@ -17,7 +17,11 @@
 
     <div v-if="!todos.length">추가된 Todo가 없습니다.</div>
     
-    <TodoList :todos="todos" />
+    <TodoList 
+      :todos="todos" 
+      @toggle-todo="toggleTodo" 
+      @delete-todo="deleteTodo" 
+    />
   </div>
 </template>
 
@@ -52,6 +56,10 @@ export default {
       color: 'gray',
     }
 
+    const toggleTodo = (index) => {
+      todos.value[index].completed = !todos.value[index].complete;
+    }
+
     return {
       toggle,
       onToggle,
@@ -59,6 +67,7 @@ export default {
       addTodo,
       deleteTodo,
       todoStyle,
+      toggleTodo
     }
   }
 }
