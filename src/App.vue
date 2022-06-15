@@ -4,6 +4,13 @@
   <div v-show="toggle">true</div>
   <div v-show="!toggle">false</div>
 
+  <div>count: {{ count }}</div>
+  <div>doubleCountComputed: {{ doubleCountComputed }}</div>
+  <div>doubleCountComputed: {{ doubleCountComputed }}</div>
+  <div>doubleCountMethod: {{ doubleCountMethod() }}</div>
+  <div>doubleCountMethod: {{ doubleCountMethod() }}</div>
+  <button @click="count++">add one</button>
+
   <!-- 조건에 맞는 div만 렌더링 
         토글하는데 비용이 많이 듬 (런타임 중 잘 안바뀔 때 사용 -->
   <div v-if="toggle">true</div>
@@ -12,21 +19,20 @@
 
   <div class="container">
     <h2>To-Do List</h2>
-    
+
+    <input type="text" class="form-control" v-model="searchText" placeholder="Search" />
+
+
     <TodoSimpleForm @add-todo="addTodo" />
 
-    <div v-if="!todos.length">추가된 Todo가 없습니다.</div>
-    
-    <TodoList 
-      :todos="todos" 
-      @toggle-todo="toggleTodo" 
-      @delete-todo="deleteTodo" 
-    />
+    <div v-if="!filterTodos.length">There is noting to display</div>
+
+    <TodoList :todos="filterTodos" @toggle-todo="toggleTodo" @delete-todo="deleteTodo" />
   </div>
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import TodoSimpleForm from './components/TodoSimpleForm.vue';
 import TodoList from './components/TodoList.vue';
 
@@ -60,6 +66,30 @@ export default {
       todos.value[index].completed = !todos.value[index].complete;
     }
 
+    const count = ref(1);
+    const doubleCountComputed = computed(()=>{
+      // 매개변수를 받아올 수 없음
+      // 캐시되어 한번만 실행
+      console.log('computed')
+      return count.value * 2;
+    })
+    const doubleCountMethod = () => {
+      // 매개변수 사용가능
+      // 호출되는 만큼 실행
+      console.log('method')
+      return count.value * 2;
+    }
+
+    const searchText = ref('');
+    const filterTodos = computed(()=>{
+      if (searchText.value) {
+        return todos.value.filter(val => {
+          return val.subject.includes(searchText.value);
+        });
+      }
+      return todos.value;
+    })
+
     return {
       toggle,
       onToggle,
@@ -67,7 +97,12 @@ export default {
       addTodo,
       deleteTodo,
       todoStyle,
-      toggleTodo
+      toggleTodo,
+      count,
+      doubleCountComputed,
+      doubleCountMethod,
+      searchText,
+      filterTodos
     }
   }
 }
