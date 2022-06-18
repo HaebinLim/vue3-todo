@@ -24,6 +24,7 @@
 
 
     <TodoSimpleForm @add-todo="addTodo" />
+    <div style="color:red;"> {{ error }} </div>
 
     <div v-if="!filterTodos.length">There is noting to display</div>
 
@@ -35,6 +36,7 @@
 import { ref, computed } from 'vue';
 import TodoSimpleForm from './components/TodoSimpleForm.vue';
 import TodoList from './components/TodoList.vue';
+import axios from 'axios';
 
 export default {
   components: {
@@ -48,9 +50,19 @@ export default {
     }
 
     const todos = ref([]);
+    const error = ref('');
 
     const addTodo = (todo) => {
-      todos.value.push(todo);
+      error.value = '';
+      axios.post('http://localhost:3000/todos', {
+        // id는 자동으로 추가 됨
+        subject: todo.subject,
+        completed: todo.completed,
+      }).then(res => {
+        todos.value.push(res.data);
+      }).catch(() => {
+        error.value = 'Something went wrong';
+      });
     }
 
     const deleteTodo = (index) => {
@@ -102,7 +114,8 @@ export default {
       doubleCountComputed,
       doubleCountMethod,
       searchText,
-      filterTodos
+      filterTodos,
+      error
     }
   }
 }
