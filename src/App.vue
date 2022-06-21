@@ -52,21 +52,45 @@ export default {
     const todos = ref([]);
     const error = ref('');
 
-    const addTodo = (todo) => {
-      error.value = '';
-      axios.post('http://localhost:3000/todos', {
-        // id는 자동으로 추가 됨
-        subject: todo.subject,
-        completed: todo.completed,
-      }).then(res => {
-        todos.value.push(res.data);
-      }).catch(() => {
+    const getTodos = async () => {
+      try {
+        const res = await axios.get('http://localhost:3000/todos');
+        todos.value = res.data;
+      } catch (err) {
         error.value = 'Something went wrong';
-      });
-    }
+      }
+    };
+    getTodos();
+    
 
-    const deleteTodo = (index) => {
-      todos.value.splice(index, 1);
+    const addTodo = async (todo) => {
+      error.value = '';
+      try {
+        const res = await axios.post('http://localhost:3000/todos', {
+          // id는 자동으로 추가 됨
+          subject: todo.subject,
+          completed: todo.completed,
+        })
+        /*
+        .then(res => {
+          todos.value.push(res.data);
+        }).catch(() => {
+          error.value = 'Something went wrong';
+        }); */
+        todos.value.push(res.data);
+      } catch (err) {
+        error.value = 'Something went wrong';
+      }
+    }
+    const deleteTodo = async (index) => {
+      error.value = '';
+      const id = todos.value[index].id;
+      try {
+        await axios.delete('http://localhost:3000/todos/' + id);
+        todos.value.splice(index, 1);
+      } catch (err) {
+        error.value = 'Something went wrong';
+      }
     }
 
     const todoStyle = {
@@ -82,13 +106,13 @@ export default {
     const doubleCountComputed = computed(()=>{
       // 매개변수를 받아올 수 없음
       // 캐시되어 한번만 실행
-      console.log('computed')
+      // console.log('computed')
       return count.value * 2;
     })
     const doubleCountMethod = () => {
       // 매개변수 사용가능
       // 호출되는 만큼 실행
-      console.log('method')
+      // console.log('method')
       return count.value * 2;
     }
 
@@ -115,7 +139,8 @@ export default {
       doubleCountMethod,
       searchText,
       filterTodos,
-      error
+      error,
+      getTodos
     }
   }
 }
