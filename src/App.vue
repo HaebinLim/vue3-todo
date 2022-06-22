@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue';
+import { ref, computed, watchEffect, reactive, watch } from 'vue';
 import TodoSimpleForm from './components/TodoSimpleForm.vue';
 import TodoList from './components/TodoList.vue';
 import axios from 'axios';
@@ -74,6 +74,27 @@ export default {
     const pages = computed(()=>{
       return Math.ceil(totalNum.value/limit);
     })
+
+    const a = reactive({
+      b: 1,
+      c: 3,
+    });
+    // 리액티브한 state 값이 바뀔 때마다 실행
+    watchEffect(() => {
+      console.log('a', a.b);
+    });
+
+    // 여러개 watch 가능
+    watch(() => [a.b, a.c], (current, prev) => {
+      console.log('x', current, prev);
+    });
+    a.b = 4;
+
+    /*
+    watch([currentPage, totalNum], (currentPage, prev)=> {
+      console.log(currentPage, prev);
+    })
+    */
 
     const getTodos = async (page = currentPage.value) => {
       currentPage.value = page;
