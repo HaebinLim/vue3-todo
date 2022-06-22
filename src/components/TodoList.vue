@@ -6,7 +6,7 @@
 					:id="`ID${todo.id}`" 
 					type="checkbox" 
 					class="form-check-input" 
-					:value="todo.completed" 
+					:checked="todo.completed" 
 					@change="toggleTodo(index)"
 				/>
 				<!-- props는 one way down bindinig
