@@ -29,6 +29,22 @@
     <div v-if="!filterTodos.length">There is noting to display</div>
 
     <TodoList :todos="filterTodos" @toggle-todo="toggleTodo" @delete-todo="deleteTodo" />
+
+    <hr />
+    <nav aria-label="Page navigation">
+      <ul class="pagination">
+        <li class="page-item" v-if="currentPage !== 1">
+          <a class="page-link" @click="getTodos(currentPage - 1)">Previous</a>
+        </li>
+        <li class="page-item" :class="currentPage === page ? 'active' : ''" v-for="page in pages" :key="page">
+          <a class="page-link" @click="getTodos(page)">{{ page }}</a>
+        </li>
+        <li class="page-item" v-if="currentPage !== pages">
+          <a class="page-link" @click="getTodos(currentPage + 1)">Next</a>
+        </li>
+      </ul>
+    </nav>
+
   </div>
 </template>
 
@@ -51,10 +67,19 @@ export default {
 
     const todos = ref([]);
     const error = ref('');
+    const totalNum = ref(null);
+    const limit = 5;
+    const currentPage = ref(1);
 
-    const getTodos = async () => {
+    const pages = computed(()=>{
+      return Math.ceil(totalNum.value/limit);
+    })
+
+    const getTodos = async (page = currentPage.value) => {
+      currentPage.value = page;
       try {
-        const res = await axios.get('http://localhost:3000/todos');
+        const res = await axios.get(`http://localhost:3000/todos?_page=${page}&_limit=${limit}`);
+        totalNum.value = res.headers['x-total-count'];
         todos.value = res.data;
       } catch (err) {
         error.value = 'Something went wrong';
@@ -149,7 +174,10 @@ export default {
       searchText,
       filterTodos,
       error,
-      getTodos
+      getTodos,
+      totalNum,
+      currentPage,
+      pages
     }
   }
 }
