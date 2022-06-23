@@ -26,9 +26,9 @@
     <TodoSimpleForm @add-todo="addTodo" />
     <div style="color:red;"> {{ error }} </div>
 
-    <div v-if="!filterTodos.length">There is noting to display</div>
+    <div v-if="!todos.length">There is noting to display</div>
 
-    <TodoList :todos="filterTodos" @toggle-todo="toggleTodo" @delete-todo="deleteTodo" />
+    <TodoList :todos="todos" @toggle-todo="toggleTodo" @delete-todo="deleteTodo" />
 
     <hr />
     <nav aria-label="Page navigation">
@@ -66,11 +66,11 @@ export default {
     }
 
     const todos = ref([]);
+    const searchText = ref('');
     const error = ref('');
     const totalNum = ref(null);
     const limit = 5;
     const currentPage = ref(1);
-
     const pages = computed(()=>{
       return Math.ceil(totalNum.value/limit);
     })
@@ -83,14 +83,13 @@ export default {
     watchEffect(() => {
       console.log('a', a.b);
     });
-
-    // 여러개 watch 가능
+    /*
+    특정 데이터가 변경되었을 때 실행, 현재 데이터와 이전 데이터를 가져옴
     watch(() => [a.b, a.c], (current, prev) => {
       console.log('x', current, prev);
     });
     a.b = 4;
-
-    /*
+    
     watch([currentPage, totalNum], (currentPage, prev)=> {
       console.log(currentPage, prev);
     })
@@ -99,7 +98,7 @@ export default {
     const getTodos = async (page = currentPage.value) => {
       currentPage.value = page;
       try {
-        const res = await axios.get(`http://localhost:3000/todos?_page=${page}&_limit=${limit}`);
+        const res = await axios.get(`http://localhost:3000/todos?_sort=id&_order=desc&subject_like=${searchText.value}&_page=${page}&_limit=${limit}`);
         totalNum.value = res.headers['x-total-count'];
         todos.value = res.data;
       } catch (err) {
@@ -112,7 +111,7 @@ export default {
     const addTodo = async (todo) => {
       error.value = '';
       try {
-        const res = await axios.post('http://localhost:3000/todos', {
+        await axios.post('http://localhost:3000/todos', {
           // id는 자동으로 추가 됨
           subject: todo.subject,
           completed: todo.completed,
@@ -123,7 +122,8 @@ export default {
         }).catch(() => {
           error.value = 'Something went wrong';
         }); */
-        todos.value.push(res.data);
+        getTodos(1);
+
       } catch (err) {
         error.value = 'Something went wrong';
       }
@@ -133,7 +133,7 @@ export default {
       const id = todos.value[index].id;
       try {
         await axios.delete('http://localhost:3000/todos/' + id);
-        todos.value.splice(index, 1);
+        getTodos(1);
       } catch (err) {
         error.value = 'Something went wrong';
       }
@@ -171,7 +171,7 @@ export default {
       return count.value * 2;
     }
 
-    const searchText = ref('');
+    /*
     const filterTodos = computed(()=>{
       if (searchText.value) {
         return todos.value.filter(val => {
@@ -179,6 +179,9 @@ export default {
         });
       }
       return todos.value;
+    })*/
+    watch(searchText, () => {
+      getTodos(1);
     })
 
     return {
@@ -193,7 +196,7 @@ export default {
       doubleCountComputed,
       doubleCountMethod,
       searchText,
-      filterTodos,
+      //filterTodos,
       error,
       getTodos,
       totalNum,
