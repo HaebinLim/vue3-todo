@@ -1,4 +1,6 @@
 <template>
+
+  <TestWrap />
   <!-- display: none/block 
         초기 렌더링 비용이 많이 듬 (토글하여 자주 바뀔 때 사용) -->
   <div v-show="toggle">true</div>
@@ -52,12 +54,15 @@
 import { ref, computed, watchEffect, reactive, watch } from 'vue';
 import TodoSimpleForm from './components/TodoSimpleForm.vue';
 import TodoList from './components/TodoList.vue';
+import TestWrap from './components/TestWrap.vue';
+
 import axios from 'axios';
 
 export default {
   components: {
     TodoSimpleForm,
-    TodoList
+    TodoList,
+    TestWrap
   },
   setup(){
     const toggle = ref(false);
